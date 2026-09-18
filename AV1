@@ -1,0 +1,210 @@
+CREATE TABLE CLIENTE(
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  NOME_COMPLETO  VARCHAR(255) NOT NULL,
+  CIDADE VARCHAR(255) NOT NULL,
+  ESTADO CHAR(2) NOT NULL
+);
+
+INSERT INTO CLIENTE ( NOME_COMPLETO, CIDADE, ESTADO) VALUES
+
+("Vinicius Santos de Melo", "Ponta Grossa", "PR"),
+("Pedro Lucas de Oliveira", "Belo Horizonte", "MG"),
+("Luana Garcia de Moraes", "Cuiabá", "MT"),
+("Michele Souza da Silva", "Goiânia", "GO"),
+("Miguel Hanisch Afonso", "Ponta Grossa", "PR");
+
+CREATE VIEW vw_cliente_pr AS  
+SELECT ID, NOME_COMPLETO, CIDADE
+FROM CLIENTE
+WHERE ESTADO = 'PR';
+
+SELECT * FROM vw_cliente_pr;
+-- ---------------------------------------------------------------------------------------------
+
+
+
+
+-- EXERCICiO 2 --  Exercício: VIEW com JOIN
+
+CREATE TABLE CLIENTE (
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  NOME_COMPLETO VARCHAR(255) NOT NULL,
+  CIDADE VARCHAR(255) NOT NULL,
+  ESTADO CHAR(2) NOT NULL
+);
+
+
+CREATE TABLE PEDIDO (
+ ID INT AUTO_INCREMENT PRIMARY KEY,
+ CLIENTE_ID INT,
+ DATA_PEDIDO DATETIME  DEFAULT CURRENT_TIMESTAMP,
+ VALOR DECIMAL(10.2),
+ FOREIGN KEY (CLIENTE_ID) REFERENCES CLIENTE(ID)
+
+
+);
+
+INSERT INTO CLIENTE (NOME_COMPLETO, CIDADE, ESTADO) VALUES
+("Vinicius Santos de Melo", "Ponta Grossa", "PR"),
+("Pedro Lucas de Oliveira", "Belo Horizonte", "MG"),
+("Luana Garcia de Moraes", "Cuiabá", "MT"),
+("Michele Souza da Silva", "Goiânia", "GO"),
+("Miguel Hanisch Afonso", "Ponta Grossa", "PR");
+
+
+INSERT INTO PEDIDO ( CLIENTE_ID,  VALOR ) VALUES
+
+(1,  150.00),
+(2,  320.50),
+(3,  89.90),
+(4,  500.00),
+(5,  210.00);
+
+
+CREATE OR REPLACE VIEW vw_pedido_cliente AS
+SELECT
+    c.nome_completo AS nome_cliente,  
+    p.valor AS valor_pedido,
+    p.data_pedido AS data_pedido      
+FROM pedido p
+JOIN cliente c ON p.cliente_id = c.id;
+
+
+SELECT * FROM vw_pedido_cliente;
+
+
+ -- -----------------------------------------------------------------------------
+
+
+-- EXERCICiO 3 -- VIEW com cálculo
+
+
+
+
+
+CREATE TABLE PRODUTO(
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  NOME VARCHAR(255) NOT NULL,
+  PRECO DECIMAL(10,2) NOT NULL,
+  ESTOQUE INT
+);
+
+
+INSERT INTO PRODUTO (NOME,PRECO,ESTOQUE) VALUES
+
+("TECLADO", 89.90, 35),
+("MOUSE PAD", 50.90, 50),
+("MOUSE", 67.67, 25),
+("MONITOR 120HZ", 278.80, 10),
+("FONE DE OUVIDO RGB GAMER", 40.00, 62);
+
+
+
+CREATE VIEW VW_VALOR_ESTOQUE AS
+SELECT NOME, PRECO, ESTOQUE, (PRECO*ESTOQUE) AS VALOR_TOTAL
+FROM PRODUTO;
+
+SELECT * FROM VW_VALOR_ESTOQUE;
+
+-- -----------------------------------------------------------------------------------
+
+  -- Exercico 4 -- VIEW com agrupamento
+
+
+
+
+ 
+CREATE TABLE CLIENTE (
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  NOME_COMPLETO VARCHAR(255) NOT NULL,
+  CIDADE VARCHAR(255) NOT NULL,
+  ESTADO CHAR(2) NOT NULL
+);
+
+CREATE TABLE PEDIDO(
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  CLIENTE_ID INT,
+  DATA_PEDIDO DATETIME DEFAULT CURRENT_TIMESTAMP,
+  VALOR DECIMAL(10.2) NOT NULL,
+  FOREIGN KEY (CLIENTE_ID) REFERENCES CLIENTE(ID)
+);
+
+INSERT INTO CLIENTE (NOME_COMPLETO , CIDADE, ESTADO) VALUES
+("Ana Silva", "Curitiba", "PR"),
+("Bruno Costa", "Maringá", "PR"),
+("Carla Souza", "São Paulo", "SP"),
+("Diego Lima", "Ponta Grossa", "PR"),
+("Elaine Rocha", "Florianópolis", "SC");
+
+INSERT INTO PEDIDO (CLIENTE_ID, VALOR) VALUES
+(1,  150.00),
+(1,  90.00),
+(2,  320.50),
+(2,  45.00),
+(3,  89.90),
+(3,  300.00),
+(4,  500.00),
+(4,  60.00),
+(5,  210.00),
+(5,  175.00);
+
+CREATE VIEW vw_total_cliente AS
+SELECT
+    c.nome_completo AS nome_cliente,
+    COUNT(p.id) AS quantidade_pedidos,
+    SUM(p.valor) AS valor_total_gasto
+FROM cliente c
+JOIN pedido p ON p.cliente_id = c.id
+GROUP BY c.id, c.nome_completo;
+
+
+select*from vw_total_cliente;
+
+
+ -- --------------------------------------------------------------------------------
+-- Exercicio 5 --VIEW com múltiplas agregações
+
+CREATE TABLE VENDEDOR(
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  NOME_COMPLETO VARCHAR(255) NOT NULL
+);
+
+
+CREATE TABLE VENDA(
+  ID INT AUTO_INCREMENT PRIMARY KEY,
+  VENDEDOR_ID INT,
+  VALOR DECIMAL (10,2) NOT NULL,
+  DATA_VENDA DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (VENDEDOR_ID) REFERENCES VENDEDOR(ID)
+);
+
+INSERT INTO VENDEDOR (NOME_COMPLETO) VALUES
+("João Pedro"),
+("Marina Alves"),
+("Rafael Nunes");
+
+INSERT INTO VENDA (VENDEDOR_ID, VALOR) VALUES
+(1, 500.00 ),
+(1, 320.00 ),
+(1, 890.00 ),
+(2, 150.00 ),
+(2, 620.00 ),
+(2, 430.00 ),
+(2, 710.00 ),
+(3, 275.00 ),
+(3, 940.00 ),
+(3, 380.00 );
+
+
+CREATE VIEW vw_desempenho_vendedores AS
+SELECT
+    v.nome_completo AS nome_vendedor,
+    COUNT(vd.id) AS quantidade_venda,
+    SUM(vd.valor) AS valor_total_vendido,
+    AVG(vd.valor) AS valor_medio_venda,
+    MAX(vd.valor) AS maior_venda
+FROM VENDEDOR v
+JOIN VENDA vd ON vd.vendedor_id = v.id
+GROUP BY v.id, v.nome_completo;
+
+SELECT*FROM vw_desempenho_vendedores;
